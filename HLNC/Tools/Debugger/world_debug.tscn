@@ -1,0 +1,282 @@
+[gd_scene load_steps=13 format=3 uid="uid://c1ngd1goslqvk"]
+
+[ext_resource type="Script" uid="uid://bbvbkslfo06n7" path="res://addons/HLNC/Tools/Debugger/WorldDebug.cs" id="1_0kcdp"]
+[ext_resource type="Script" uid="uid://xe2j1rptt30t" path="res://addons/HLNC/Tools/Debugger/WorldInspector.cs" id="2_0kcdp"]
+[ext_resource type="Script" uid="uid://shxtf41r0cc6" path="res://addons/HLNC/Tools/Debugger/logs_view.gd" id="2_aqlnc"]
+[ext_resource type="PackedScene" uid="uid://crdgpqgenb0xf" path="res://addons/HLNC/Tools/Inspector/inspector_title.tscn" id="3_c7nnj"]
+[ext_resource type="Script" uid="uid://mc11470e1j5a" path="res://addons/HLNC/Tools/Debugger/log.gd" id="3_jgfhb"]
+[ext_resource type="Script" uid="uid://33t11xduw86l" path="res://addons/HLNC/Tools/Debugger/nodes_view.gd" id="3_mwir2"]
+[ext_resource type="PackedScene" uid="uid://bq4fgpxhp5lg6" path="res://addons/HLNC/Tools/Inspector/inspector_field.tscn" id="4_aqlnc"]
+[ext_resource type="Script" uid="uid://djgtovgbd7msd" path="res://addons/HLNC/Tools/Debugger/Ticks/mtu_labels.gd" id="5_i2pr6"]
+[ext_resource type="Script" uid="uid://vk7funn8v20x" path="res://addons/HLNC/Tools/Debugger/Ticks/FrameContainer.cs" id="6_aqlnc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_luhx5"]
+bg_color = Color(0.211765, 0.239216, 0.290196, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nebq5"]
+bg_color = Color(0.129412, 0.14902, 0.180392, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_daqjl"]
+bg_color = Color(0.145098, 0.152941, 0.176471, 1)
+
+[node name="WorldDebug" type="Panel" node_paths=PackedStringArray("worldIdLabel")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_luhx5")
+script = ExtResource("1_0kcdp")
+worldIdLabel = NodePath("MarginContainer/VBoxContainer/HBoxContainer/WorldId")
+metadata/_tab_index = 0
+
+[node name="AllLogs" type="Window" parent="." node_paths=PackedStringArray("follow_check_box")]
+title = "Logs"
+size = Vector2i(640, 480)
+visible = false
+script = ExtResource("2_aqlnc")
+follow_check_box = NodePath("Panel/CheckBox")
+
+[node name="Panel" type="Panel" parent="AllLogs"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LogBox" type="RichTextLabel" parent="AllLogs/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
+selection_enabled = true
+
+[node name="CheckBox" type="CheckBox" parent="AllLogs/Panel"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -79.0
+offset_bottom = 31.0
+grow_horizontal = 0
+size_flags_horizontal = 8
+button_pressed = true
+text = "Follow"
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "World:"
+
+[node name="WorldId" type="RichTextLabel" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+vertical_alignment = 1
+selection_enabled = true
+
+[node name="Divider2" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Ruler" type="Panel" parent="MarginContainer/VBoxContainer/Divider2"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+
+[node name="Detail" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TabContainer" type="TabContainer" parent="MarginContainer/VBoxContainer/Detail"]
+layout_mode = 2
+size_flags_horizontal = 3
+current_tab = 0
+
+[node name="Peers" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Detail/TabContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+metadata/_tab_index = 0
+
+[node name="ItemList" type="ItemList" parent="MarginContainer/VBoxContainer/Detail/TabContainer/Peers"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Nodes" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Detail/TabContainer" node_paths=PackedStringArray("world_debug")]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_mwir2")
+world_debug = NodePath("../../../../..")
+metadata/_tab_index = 1
+
+[node name="Tree" type="Tree" parent="MarginContainer/VBoxContainer/Detail/TabContainer/Nodes"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Calls" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Detail/TabContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+metadata/_tab_index = 2
+
+[node name="ItemList" type="ItemList" parent="MarginContainer/VBoxContainer/Detail/TabContainer/Calls"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Logs" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Detail/TabContainer" node_paths=PackedStringArray("follow_check_box", "worldDebug")]
+visible = false
+layout_mode = 2
+script = ExtResource("3_jgfhb")
+follow_check_box = NodePath("../../../../../AllLogs/Panel/CheckBox")
+worldDebug = NodePath("../../../../..")
+metadata/_tab_index = 3
+
+[node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/Detail/TabContainer/Logs"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+selection_enabled = true
+
+[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/Detail/TabContainer/Logs"]
+layout_mode = 2
+text = "View All Logs"
+
+[node name="TabContainer2" type="TabContainer" parent="MarginContainer/VBoxContainer/Detail"]
+layout_mode = 2
+size_flags_horizontal = 3
+current_tab = 0
+
+[node name="Inspector" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Detail/TabContainer2" node_paths=PackedStringArray("debugPanel", "inspectorContainer")]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("2_0kcdp")
+debugPanel = NodePath("../../../../..")
+inspectorContainer = NodePath("ScrollContainer/VBoxContainer")
+metadata/_tab_index = 0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/Detail/TabContainer2/Inspector"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_nebq5")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Detail/TabContainer2/Inspector/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Panel" parent="MarginContainer/VBoxContainer/Detail/TabContainer2/Inspector/ScrollContainer/VBoxContainer" instance=ExtResource("3_c7nnj")]
+layout_mode = 2
+
+[node name="FieldTickId" parent="MarginContainer/VBoxContainer/Detail/TabContainer2/Inspector/ScrollContainer/VBoxContainer" instance=ExtResource("4_aqlnc")]
+layout_mode = 2
+
+[node name="FieldTickTimestamp" parent="MarginContainer/VBoxContainer/Detail/TabContainer2/Inspector/ScrollContainer/VBoxContainer" instance=ExtResource("4_aqlnc")]
+layout_mode = 2
+
+[node name="Label" parent="MarginContainer/VBoxContainer/Detail/TabContainer2/Inspector/ScrollContainer/VBoxContainer/FieldTickTimestamp/HBoxContainer" index="0"]
+text = "Timestamp"
+
+[node name="Divider" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Ruler" type="Panel" parent="MarginContainer/VBoxContainer/Divider"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+
+[node name="Frames" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 128)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Frames"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Tick Frames"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Frames"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Panel2" type="ScrollContainer" parent="MarginContainer/VBoxContainer/Frames/HBoxContainer"]
+custom_minimum_size = Vector2(0, 128)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_daqjl")
+horizontal_scroll_mode = 2
+
+[node name="FrameContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Frames/HBoxContainer/Panel2" node_paths=PackedStringArray("debugPanel", "liveCheckbox")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+script = ExtResource("6_aqlnc")
+debugPanel = NodePath("../../../../../..")
+liveCheckbox = NodePath("../../../LiveCheckbox")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Frames/HBoxContainer"]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+script = ExtResource("5_i2pr6")
+
+[node name="MTUMax" type="Label" parent="MarginContainer/VBoxContainer/Frames/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "100"
+
+[node name="MTUMed" type="Label" parent="MarginContainer/VBoxContainer/Frames/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "50"
+vertical_alignment = 1
+
+[node name="MTUMin" type="Label" parent="MarginContainer/VBoxContainer/Frames/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "0"
+vertical_alignment = 2
+
+[node name="LiveCheckbox" type="CheckBox" parent="MarginContainer/VBoxContainer/Frames"]
+layout_mode = 2
+size_flags_horizontal = 0
+button_pressed = true
+text = "Live"
+
+[connection signal="Log" from="." to="AllLogs" method="_on_world_debug_log"]
+[connection signal="Log" from="." to="MarginContainer/VBoxContainer/Detail/TabContainer/Logs" method="_on_world_debug_log"]
+[connection signal="TickFrameReceived" from="." to="MarginContainer/VBoxContainer/Frames/HBoxContainer/Panel2/FrameContainer" method="_OnReceiveFrame"]
+[connection signal="TickFrameSelected" from="." to="." method="_OnTickFrameSelected"]
+[connection signal="TickFrameSelected" from="." to="MarginContainer/VBoxContainer/Detail/TabContainer/Nodes" method="_on_world_debug_tick_frame_selected"]
+[connection signal="TickFrameSelected" from="." to="MarginContainer/VBoxContainer/Detail/TabContainer/Logs" method="_on_world_debug_tick_frame_selected"]
+[connection signal="TickFrameSelected" from="." to="MarginContainer/VBoxContainer/Detail/TabContainer2/Inspector" method="_OnTickFrameSelected"]
+[connection signal="TickFrameUpdated" from="." to="MarginContainer/VBoxContainer/Detail/TabContainer/Nodes" method="_on_world_debug_tick_frame_updated"]
+[connection signal="TickFrameUpdated" from="." to="MarginContainer/VBoxContainer/Frames/HBoxContainer/Panel2/FrameContainer" method="_OnFrameUpdated"]
+[connection signal="close_requested" from="AllLogs" to="AllLogs" method="_on_close_requested"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Detail/TabContainer/Logs/Button" to="AllLogs" method="_on_open"]
+[connection signal="scroll_started" from="MarginContainer/VBoxContainer/Frames/HBoxContainer/Panel2" to="." method="_OnFramesScroll"]
+
+[editable path="MarginContainer/VBoxContainer/Detail/TabContainer2/Inspector/ScrollContainer/VBoxContainer/FieldTickId"]
+[editable path="MarginContainer/VBoxContainer/Detail/TabContainer2/Inspector/ScrollContainer/VBoxContainer/FieldTickTimestamp"]

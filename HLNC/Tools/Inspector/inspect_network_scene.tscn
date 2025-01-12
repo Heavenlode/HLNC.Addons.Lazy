@@ -1,0 +1,57 @@
+[gd_scene load_steps=4 format=3 uid="uid://d0q0xyjdl1fbd"]
+
+[ext_resource type="Script" uid="uid://ovs8naegkmwu" path="res://addons/HLNC/Tools/Inspector/inspect_network_scene.gd" id="1_u8610"]
+[ext_resource type="PackedScene" uid="uid://ywhp3yi0fvpa" path="res://addons/HLNC/Tools/Inspector/accordion.tscn" id="2_w37so"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r6w0v"]
+bg_color = Color(0.31175, 0.1935, 0.43, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+
+[node name="VBoxContainer" type="VBoxContainer" node_paths=PackedStringArray("properties_parent", "properties_container", "title_label")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+script = ExtResource("1_u8610")
+properties_parent = NodePath("Items/Properties")
+properties_container = NodePath("Items/Properties/Container/Container")
+title_label = NodePath("Heading/Label")
+
+[node name="Heading" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_r6w0v")
+
+[node name="Label" type="Label" parent="Heading"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+text = "Network"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Items" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Properties" parent="Items" instance=ExtResource("2_w37so")]
+visible = false
+layout_mode = 2
+
+[node name="Functions" parent="Items" instance=ExtResource("2_w37so")]
+visible = false
+layout_mode = 2
+
+[node name="Button" parent="Items/Functions" index="0"]
+text = "▶ Functions"
+
+[editable path="Items/Properties"]
+[editable path="Items/Functions"]
