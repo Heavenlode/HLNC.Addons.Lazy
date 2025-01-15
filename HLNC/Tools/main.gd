@@ -22,9 +22,9 @@ func _enter_tree():
     add_autoload_singleton(AUTOLOAD_RUNNER, "res://addons/HLNC/Core/NetworkRunner.cs")
 
     var network_transform_3d_icon = EditorInterface.get_editor_theme().get_icon("RemoteTransform3D", "EditorIcons")
-    add_custom_type("NetworkTransform3D", "Node", preload("res://addons/HLNC/Addons/NetworkTransform/NetworkTransform3D.cs"), network_transform_3d_icon)
+    add_custom_type("NetworkTransform3D", "Node", preload("res://addons/HLNC/Core/Nodes/NetworkTransform/NetworkTransform3D.cs"), network_transform_3d_icon)
     var network_transform_2d_icon = EditorInterface.get_editor_theme().get_icon("RemoteTransform2D", "EditorIcons")
-    add_custom_type("NetworkTransform2D", "Node", preload("res://addons/HLNC/Addons/NetworkTransform/NetworkTransform2D.cs"), network_transform_2d_icon)
+    add_custom_type("NetworkTransform2D", "Node", preload("res://addons/HLNC/Core/Nodes/NetworkTransform/NetworkTransform2D.cs"), network_transform_2d_icon)
 
     var project_settings_controller = ProjectSettingsController.new()
     add_child(project_settings_controller)

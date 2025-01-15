@@ -1,9 +1,7 @@
 using System;
 using Godot;
 using System.Linq;
-using MongoDB.Bson;
 using System.Collections.Generic;
-using HLNC.Addons.Lazy;
 
 namespace HLNC.Serialization
 {
@@ -94,11 +92,12 @@ namespace HLNC.Serialization
                     )
             {
                 propType = Variant.Type.Object;
-                if (t == typeof(LazyPeerState))
-                {
-                    subType = VariantSubtype.Lazy;
-                }
-                else if (t == typeof(INetworkNode))
+                // if (t == typeof(LazyPeerState))
+                // {
+                //     subType = VariantSubtype.Lazy;
+                // }
+                // else
+                if (t == typeof(INetworkNode))
                 {
                     subType = VariantSubtype.NetworkNode;
                 }

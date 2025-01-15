@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Godot;
 using HLNC.Serialization;
 using System;
-using HLNC.Addons.Blastoff;
 using HLNC.Utils;
 
 namespace HLNC
@@ -77,37 +76,6 @@ namespace HLNC
         /// </summary>
         public bool NetStarted { get; private set; }
 
-        internal IBlastoffServerDriver BlastoffServer { get; private set; }
-        internal IBlastoffClientDriver BlastoffClient { get; private set; }
-
-        /// <summary>
-        /// These are commands which the server may send to Blastoff, which informs Blastoff how to act upon the client connection.
-        /// </summary>
-        public enum BlastoffCommands
-        {
-
-            /// <summary>
-            /// Requests Blastoff to create a new server instance, i.e. of the game.
-            /// </summary>
-            NewInstance = 0,
-
-            /// <summary>
-            /// Informs Blastoff that the client is valid and communication may be bridged.
-            /// </summary>
-            ValidateClient = 1,
-
-            /// <summary>
-            /// Requests Blastoff to redirect the user to another world Id.
-            /// </summary>
-            RedirectClient = 2,
-
-            /// <summary>
-            /// Requests Blastoff to disconnect the client.
-            /// </summary>
-            InvalidClient = 3,
-        }
-        internal HashSet<NetPeer> BlastoffPendingValidation = new HashSet<NetPeer>();
-
         /// <summary>
         /// Describes the channels of communication used by the network.
         /// </summary>
@@ -150,28 +118,6 @@ namespace HLNC
             Instance = this;
         }
 
-        public void InstallBlastoffServerDriver(IBlastoffServerDriver blastoff)
-        {
-            if (!OS.HasFeature("dedicated_server"))
-            {
-                Debugger.Log("Incorrectly installing Blastoff server driver on client.");
-                return;
-            }
-            BlastoffServer = blastoff;
-            Debugger.Log("Blastoff Installed");
-        }
-
-        public void InstallBlastoffClientDriver(IBlastoffClientDriver blastoff)
-        {
-            if (OS.HasFeature("dedicated_server"))
-            {
-                Debugger.Log("Incorrectly installing Blastoff client driver on server.");
-                return;
-            }
-            BlastoffClient = blastoff;
-            Debugger.Log("Blastoff Installed");
-        }
-
         private ENetConnection debugEnet;
 
         public void StartServer()
@@ -206,7 +152,8 @@ namespace HLNC
         {
             ENet = new ENetConnection();
             ENet.CreateHost();
-            ENetHost = ENet.ConnectToHost(ServerAddress, BlastoffClient != null ? 20406 : Port);
+            // ENetHost = ENet.ConnectToHost(ServerAddress, BlastoffClient != null ? 20406 : Port);
+            ENetHost = ENet.ConnectToHost(ServerAddress, Port);
             ENet.Compress(ENetConnection.CompressionMode.RangeCoder);
             if (ENetHost == null)
             {
@@ -285,7 +232,7 @@ namespace HLNC
                     case ENetConnection.EventType.Connect:
                         if (packetPeer == ENetHost)
                         {
-                            _OnConnectedToServer();
+                            // _OnConnectedToServer();
                         }
                         else
                         {
@@ -335,35 +282,35 @@ namespace HLNC
                                     WorldRunner.CurrentWorld.ReceiveNetworkFunction(ENetHost, data);
                                 }
                                 break;
-                            case ENetChannelId.BlastoffAdmin:
-                                if (IsServer)
-                                {
-                                    if (BlastoffServer == null)
-                                    {
-                                        // This channel is only used for Blastoff which must be enabled.
-                                        break;
-                                    }
-                                    if (BlastoffPendingValidation.Contains(packetPeer))
-                                    {
-                                        // We're in the process of validating a peer for Blastoff.
-                                        var token = System.Text.Encoding.UTF8.GetString(data.bytes);
-                                        if (BlastoffServer.BlastoffValidatePeer(token, out var worldId))
-                                        {
-                                            _validatePeerConnected(packetPeer, worldId, token);
-                                            packetPeer.Send((int)ENetChannelId.BlastoffAdmin, [(byte)BlastoffCommands.ValidateClient], (int)ENetPacketPeer.FlagReliable);
-                                        }
-                                        else
-                                        {
-                                            packetPeer.Send((int)ENetChannelId.BlastoffAdmin, [(byte)BlastoffCommands.InvalidClient], (int)ENetPacketPeer.FlagReliable);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    // Clients should never receive messages on the Blastoff channel
-                                    break;
-                                }
-                                break;
+                            // case ENetChannelId.BlastoffAdmin:
+                            //     if (IsServer)
+                            //     {
+                            //         if (BlastoffServer == null)
+                            //         {
+                            //             // This channel is only used for Blastoff which must be enabled.
+                            //             break;
+                            //         }
+                            //         if (BlastoffPendingValidation.Contains(packetPeer))
+                            //         {
+                            //             // We're in the process of validating a peer for Blastoff.
+                            //             var token = System.Text.Encoding.UTF8.GetString(data.bytes);
+                            //             if (BlastoffServer.BlastoffValidatePeer(token, out var worldId))
+                            //             {
+                            //                 _validatePeerConnected(packetPeer, worldId, token);
+                            //                 packetPeer.Send((int)ENetChannelId.BlastoffAdmin, [(byte)BlastoffCommands.ValidateClient], (int)ENetPacketPeer.FlagReliable);
+                            //             }
+                            //             else
+                            //             {
+                            //                 packetPeer.Send((int)ENetChannelId.BlastoffAdmin, [(byte)BlastoffCommands.InvalidClient], (int)ENetPacketPeer.FlagReliable);
+                            //             }
+                            //         }
+                            //     }
+                            //     else
+                            //     {
+                            //         // Clients should never receive messages on the Blastoff channel
+                            //         break;
+                            //     }
+                            //     break;
 
                         }
                         break;
@@ -384,42 +331,20 @@ namespace HLNC
                 wrapper.SetPeerInterest(peerId, Int64.MaxValue, true);
             }
             Worlds[worldId].JoinPeer(peer, token);
-            BlastoffPendingValidation.Remove(peer);
+            // BlastoffPendingValidation.Remove(peer);
         }
-
-        private void StartBlastoffNegotiation()
-        {
-            // We build the UUID as a string because of endian issues... or something
-            // This is related to UUID Representation in C#
-            var tokenBytes = System.Text.Encoding.UTF8.GetBytes(BlastoffClient.BlastoffGetToken());
-            var err = ENetHost.Send((int)ENetChannelId.BlastoffAdmin, tokenBytes, (int)ENetPacketPeer.FlagReliable);
-            if (err != Error.Ok)
-            {
-                Debugger.Log($"Error sending Blastoff data: {err}");
-            }
-        }
-
-        private void _OnConnectedToServer()
-        {
-            Debugger.Log("Connected to server");
-            if (BlastoffClient != null)
-            {
-                StartBlastoffNegotiation();
-            }
-        }
-
         private void _OnPeerConnected(NetPeer peer)
         {
             Debugger.Log($"Peer {peer} joined");
-            if (BlastoffServer != null)
-            {
-                BlastoffPendingValidation.Add(peer);
-            }
-            else
-            {
+            // if (BlastoffServer != null)
+            // {
+            //     BlastoffPendingValidation.Add(peer);
+            // }
+            // else
+            // {
                 // TODO: Don't use GUID Empty
                 _validatePeerConnected(peer, Guid.Empty);
-            }
+            // }
         }
 
         [Signal]
